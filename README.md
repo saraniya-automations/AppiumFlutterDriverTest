@@ -278,10 +278,3 @@ artifacts:
 4. Update README for new features
 5. Ensure all tests pass before committing
 
-## License
-
-[Add your license information here]
-
-## Contact
-
-For questions or support, contact the test automation team.
