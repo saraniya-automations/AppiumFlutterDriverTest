@@ -1,95 +1,43 @@
-//package pages;
-//
-//import appium_flutter_driver.finder.FlutterElement;
-//import io.appium.java_client.AppiumDriver;
-//
-//public class LoginPage extends BasePage {
-//
-//    public LoginPage(AppiumDriver driver) {
-//        super(driver);
-//    }
-//
-//    // Locators
-//    private FlutterElement usernameField() {
-//        return finder.byValueKey("txt_username");
-//    }
-//
-//    private FlutterElement passwordField() {
-//        return finder.byValueKey("txt_password");
-//    }
-//
-//    private FlutterElement loginButton() {
-//        return finder.byValueKey("button_login");
-//    }
-//
-//    // Actions - using flutter:enterText instead of sendKeys (known Flutter driver requirement)
-//    public void enterUsername(String username) {
-//        FlutterElement field = usernameField();
-//        waitForElement(field);
-//        field.click(); // focus the field first
-//        driver.executeScript("flutter:enterText", username);
-//    }
-//
-//    public void enterPassword(String password) {
-//        FlutterElement field = passwordField();
-//        waitForElement(field);
-//        field.click(); // focus the field first
-//        driver.executeScript("flutter:enterText", password);
-//    }
-//
-//    public void clickLogin() {
-//        click(loginButton());
-//    }
-//
-//    // Combined action
-//    public void login(String username, String password) {
-//        enterUsername(username);
-//        enterPassword(password);
-//        clickLogin();
-//    }
-//}
-
 package pages;
 
-import appium_flutter_driver.finder.FlutterElement;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.AppiumBy;
+import appium_flutter_driver.finder.FlutterElement;
+import org.openqa.selenium.WebElement;
 
+// ✅ AFTER — initialize fields after super(driver)
 public class LoginPage extends BasePage {
 
+    private final FlutterElement usernameField;
+    private final FlutterElement passwordField;
+    private final FlutterElement loginButton;
+
     public LoginPage(AppiumDriver driver) {
-        super(driver);
+        super(driver);  // finder is now ready
+        this.usernameField = finder.byValueKey("username");
+        this.passwordField = finder.byValueKey("password");
+        this.loginButton   = finder.byText("ENTER");
+
     }
 
-    // Locators — these keys must match Key("...") values in your Flutter app
-    private FlutterElement usernameField() {
-        return finder.byValueKey("txt_username");
+    public LoginPage enterUsername(String username) {
+        type(usernameField, username);
+        return this;
     }
 
-    private FlutterElement passwordField() {
-        return finder.byValueKey("txt_password");
+    public LoginPage enterPassword(String password) {
+        type(passwordField, password);
+        return this;
     }
 
-    private FlutterElement loginButton() {
-        return finder.byValueKey("button_login");
+    public CatalogPage clickLogin() {
+        click(loginButton);
+        return new CatalogPage(driver);
     }
 
-    // Actions
-    public void enterUsername(String username) {
-        type(usernameField(), username);
-    }
-
-    public void enterPassword(String password) {
-        type(passwordField(), password);
-    }
-
-    public void clickLogin() {
-        click(loginButton());
-    }
-
-    // Combined action
-    public void login(String username, String password) {
-        enterUsername(username);
-        enterPassword(password);
-        clickLogin();
+    public CatalogPage login(String username, String password) {
+        enterUsername(username)
+                .enterPassword(password);
+        return clickLogin();
     }
 }

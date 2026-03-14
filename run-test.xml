@@ -3,10 +3,14 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
 <suite name = "BAAndroid">
+    <listeners>
+        <listener class-name="listeners.TestListener"/>
+    </listeners>
     <test name = "BAAndroid tests.AppiumTestDemo" >
         <classes>
-            <class name="tests.AppiumTestDemo"> </class>
+            <class name="tests.LoginTest"> </class>
         </classes>
     </test>
+    
 </suite>
 

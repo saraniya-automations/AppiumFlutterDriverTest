@@ -12,6 +12,7 @@
         <kotlin.version>1.9.0</kotlin.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+         <appium-flutterfinder-java.version>1.0.10</appium-flutterfinder-java.version>
     </properties>
 
     <build>
@@ -71,25 +72,24 @@
 
     <dependencies>
 
-        <!-- Appium Java Client 8.x (includes Flutter locator support via AppiumBy) -->
         <dependency>
             <groupId>io.appium</groupId>
             <artifactId>java-client</artifactId>
             <version>8.6.0</version>
-            <exclusions>
-                <!-- Exclude transitive selenium to avoid version conflicts -->
-                <exclusion>
-                    <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-java</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
-        <!-- Selenium 4 required by Appium Java Client 8.x -->
+        <!-- Selenium 4 -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>4.18.1</version>
+        </dependency>
+
+        <!-- Appium Flutter Finder -->
+        <dependency>
+            <groupId>io.github.ashwithpoojary98</groupId>
+            <artifactId>appium_flutterfinder_java</artifactId>
+            <version>${appium-flutterfinder-java.version}</version>
         </dependency>
 
         <!-- TestNG -->

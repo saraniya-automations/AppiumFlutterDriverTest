@@ -1,0 +1,79 @@
+# Maven
+target/
+!target/test-classes/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+.m2/
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+*.iml.bak
+*.swp
+*.swo
+*~
+
+# IDE - VSCode
+.vscode/
+.classpath
+.factorypath
+.c9/
+*.launch
+.project
+.pydevproject
+.settings/
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+.env.local
+.env.*.local
+
+# Build artifacts
+/bin/
+/out/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+
+# Test outputs
+test-output/
+surefire-reports/
+**/target/reports/
+
+# Flutter/APK files
+*.apk
+*.ipa
+*.zip
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.dart_tool/
+
+# Screenshots (unless you want to track them)
+# Uncomment the next line if you don't want to track screenshots
+# screenshots/
+
+# Gradle
+.gradle
+/build/
+gradle-app.setting
+gradlew.bat
+
+# General
+*.log
+*.pid
+*.seed
+*.pid.lock
+.cache/
+node_modules/

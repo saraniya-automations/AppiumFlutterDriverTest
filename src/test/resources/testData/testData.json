@@ -1,0 +1,11 @@
+{
+  "loginTests": [
+    {
+      "email": "faisal.k@user.com",
+      "password": "Pass1234",
+      "expected": "success",
+      "Invalidemail": "faisal@user.com",
+      "Invalidpassword": "Pass1234"
+    }
+  ]
+}
