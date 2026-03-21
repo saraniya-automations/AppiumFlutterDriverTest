@@ -11,10 +11,6 @@ pipeline {
     }
     
     environment {
-        // Java configuration - Apple Silicon (arm64) homebrew path
-        JAVA_HOME = '/opt/homebrew/opt/openjdk@17'
-        PATH = "${JAVA_HOME}/bin:/usr/local/bin:/opt/homebrew/bin:${PATH}"
-        
         // Appium configuration
         APPIUM_URL = 'http://127.0.0.1:4723/wd/hub'
         PLATFORM_NAME = 'Android'
@@ -38,7 +34,11 @@ pipeline {
             steps {
                 echo "=== Verifying Environment ==="
                 sh '''
+                    export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+                    export PATH="${JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${PATH}"
+                    
                     echo "JAVA_HOME: $JAVA_HOME"
+                    echo "Java Path: $(which java)"
                     echo "Java Version:"
                     java -version
                     echo ""
@@ -58,6 +58,10 @@ pipeline {
             steps {
                 echo "=== Building project ==="
                 sh '''
+                    export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+                    export PATH="${JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${PATH}"
+                    
+                    echo "Using Java: $(java -version 2>&1 | head -1)"
                     mvn clean compile -DskipTests
                 '''
             }
@@ -67,6 +71,8 @@ pipeline {
             steps {
                 echo "=== Starting Services ==="
                 sh '''
+                    export PATH="/opt/homebrew/bin:/usr/local/bin:${PATH}"
+                    
                     # Kill any existing Appium
                     pkill -f "appium" 2>/dev/null || true
                     sleep 2
@@ -120,6 +126,10 @@ pipeline {
             steps {
                 echo "=== Running Flutter Tests ==="
                 sh '''
+                    export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+                    export PATH="${JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${PATH}"
+                    
+                    echo "Using Java: $(java -version 2>&1 | head -1)"
                     mvn clean test
                 '''
             }
