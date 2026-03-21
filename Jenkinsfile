@@ -35,9 +35,11 @@ pipeline {
                 echo "=== Verifying Environment ==="
                 sh '''
                     export JAVA_HOME=/opt/homebrew/opt/openjdk@17
-                    export PATH="${JAVA_HOME}/bin:/opt/homebrew/bin:/usr/local/bin:${PATH}"
+                    export ANDROID_SDK_ROOT=/Users/ajaysara/Library/Android/sdk
+                    export PATH="${JAVA_HOME}/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:/opt/homebrew/bin:/usr/local/bin:${PATH}"
                     
                     echo "JAVA_HOME: $JAVA_HOME"
+                    echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
                     echo "Java Path: $(which java)"
                     echo "Java Version:"
                     java -version
@@ -71,7 +73,8 @@ pipeline {
             steps {
                 echo "=== Starting Services ==="
                 sh '''
-                    export PATH="/opt/homebrew/bin:/usr/local/bin:${PATH}"
+                    export ANDROID_SDK_ROOT=/Users/ajaysara/Library/Android/sdk
+                    export PATH="${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:/opt/homebrew/bin:/usr/local/bin:${PATH}"
                     
                     # Kill any existing Appium
                     pkill -f "appium" 2>/dev/null || true
