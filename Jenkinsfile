@@ -13,7 +13,7 @@ pipeline {
     environment {
         // Java configuration
         JAVA_HOME = '/usr/local/opt/openjdk@17'
-        PATH = "${JAVA_HOME}/bin:${PATH}"
+        PATH = "${JAVA_HOME}/bin:/usr/local/bin:/opt/homebrew/bin:${PATH}"
         
         // Appium configuration
         APPIUM_URL = 'http://127.0.0.1:4723/wd/hub'
@@ -54,28 +54,53 @@ pipeline {
             }
         }
         
-        stage('Verify Services') {
+        stage('Start Services') {
             steps {
-                echo "=== Checking Appium and Emulator ==="
+                echo "=== Starting Services ==="
                 sh '''
-                    echo "Checking if Appium is running..."
-                    if curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null; then
-                        echo "✓ Appium is running"
-                    else
-                        echo "✗ Appium is NOT running!"
-                        echo "Start Appium with: appium"
+                    # Kill any existing Appium
+                    pkill -f "appium" 2>/dev/null || true
+                    sleep 2
+                    
+                    # Start Appium in background
+                    echo "Starting Appium server..."
+                    appium > /tmp/appium.log 2>&1 &
+                    APPIUM_PID=$!
+                    echo "Appium PID: $APPIUM_PID"
+                    
+                    # Wait for Appium to initialize
+                    for i in {1..15}; do
+                        if curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null 2>&1; then
+                            echo "✓ Appium is responding"
+                            break
+                        fi
+                        if [ $i -lt 15 ]; then
+                            echo "Waiting for Appium to start... ($i/15)"
+                            sleep 1
+                        fi
+                    done
+                    
+                    # Final check
+                    if ! curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null 2>&1; then
+                        echo "✗ Appium failed to start"
+                        echo "=== Appium Log ==="
+                        cat /tmp/appium.log
                         exit 1
                     fi
                     
+                    # Check emulator/device
                     echo ""
-                    echo "Checking emulator/device..."
+                    echo "Checking for connected emulator/device..."
+                    sleep 2
                     adb devices
+                    sleep 2
                     
-                    if adb devices | grep -q "device$"; then
-                        echo "✓ Emulator/Device is connected"
+                    DEVICE_COUNT=$(adb devices | grep -c "device$")
+                    if [ $DEVICE_COUNT -gt 0 ]; then
+                        echo "✓ Found $DEVICE_COUNT connected device(s)"
                     else
-                        echo "✗ No emulator/device found!"
-                        echo "Start emulator: emulator -avd Medium_Phone_API_36.1 &"
+                        echo "✗ No emulator/device connected"
+                        echo "Start emulator with: emulator -avd Medium_Phone_API_36.1 &"
                         exit 1
                     fi
                 '''
@@ -111,6 +136,11 @@ pipeline {
     
     post {
         always {
+            echo "=== Build Cleanup ==="
+            
+            // Kill Appium
+            sh 'pkill -f "appium" || true'
+            
             // Archive test reports and artifacts
             archiveArtifacts artifacts: 'target/surefire-reports/**,target/test-output/**,test-output/**', 
                              allowEmptyArchive: true
@@ -125,11 +155,15 @@ pipeline {
         }
         
         failure {
-            echo "❌ BUILD FAILED - Verify Appium and emulator are running"
-            echo "Start services with:"
-            echo "  1. emulator -avd Medium_Phone_API_36.1 &"
-            echo "  2. appium"
-            echo "Then rebuild"
+            echo "❌ BUILD FAILED"
+            echo "Most likely cause: Emulator not running"
+            echo ""
+            echo "Fix and retry:"
+            echo "  1. Start emulator: emulator -avd Medium_Phone_API_36.1 &"
+            echo "  2. Wait 30 seconds for full boot"
+            echo "  3. Click 'Build Now' in Jenkins"
+            echo ""
+            echo "Jenkins will start Appium automatically"
         }
     }
 }
