@@ -17,9 +17,9 @@ import java.awt.Desktop;
 public class TestBase {
 
     // --- Driver and reporting objects ---
-    public static AppiumDriver driver;        // accessible to tests
-    public static ExtentReports extent;       // accessible to listeners
-    public static ExtentTest logger;          // accessible to listeners
+    public static AppiumDriver driver; // accessible to tests
+    public static ExtentReports extent; // accessible to listeners
+    public static ExtentTest logger; // accessible to listeners
 
     // --- TestNG Suite Hooks ---
 
@@ -55,21 +55,35 @@ public class TestBase {
         options.setAutomationName(ConfigReader.get("automationName")); // Should be "Flutter"
         options.setApp(ConfigReader.get("appPath")); // path to your APK
 
+        // Add Flutter-specific capabilities
+        options.setCapability("useSystemUiautomator", false);
+        options.setCapability("forceAppLaunch", true);
+        options.setCapability("retryBackoffFactor", 1.5);
+        options.setCapability("retryInterval", 100);
+        options.setCapability("noReset", false); // Reset app state before each test
+        options.setCapability("fullReset", false);
+
+        // Increase connection timeout for Flutter apps
+        options.setCapability("appWaitDuration", 45000); // 45 seconds
+
         driver = new AndroidDriver(
                 new URL(ConfigReader.get("appiumServer")),
-                options
-        );
+                options);
 
         // Implicit wait
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
-        
-        // For Flutter apps, execute flutter:isReady to ensure Flutter driver is connected
+        // Note: pageLoadTimeout not supported by Flutter driver
+
+        // For Flutter apps, wait for it to be ready
+        System.out.println("Waiting for Flutter app to initialize...");
+        Thread.sleep(3000); // Give app time to start
+
         try {
             driver.executeScript("flutter:isReady");
             System.out.println("✓ Flutter driver connected successfully");
         } catch (Exception e) {
-            System.err.println("⚠ Flutter driver not ready. Ensure Appium Flutter Driver plugin is installed on your Appium server.");
-            System.err.println("Install with: npm install -g appium-flutter-driver");
+            System.out.println("⚠ Warning: Flutter driver not ready, but continuing with test");
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -87,22 +101,22 @@ public class TestBase {
      * Switch to Flutter context (for Flutter driver plugin)
      */
     // public void switchToFlutter() {
-    //     try {
-    //         driver.executeScript("flutter:isReady");
-    //         System.out.println("Already in Flutter context");
-    //     } catch (Exception e) {
-    //         System.err.println("Cannot switch to Flutter context: " + e.getMessage());
-    //     }
+    // try {
+    // driver.executeScript("flutter:isReady");
+    // System.out.println("Already in Flutter context");
+    // } catch (Exception e) {
+    // System.err.println("Cannot switch to Flutter context: " + e.getMessage());
+    // }
     // }
     /**
      * Switch to Flutter context (Flutter context is already set via automationName)
      */
     public void switchToFlutter() {
-       try {
-        ((AndroidDriver) driver).context("FLUTTER");
-        System.out.println("Switched to Flutter context successfully");
-       }catch (Exception e) {
-        System.err.println("Failed to switch to Flutter context: " + e.getMessage());
-       }
+        try {
+            ((AndroidDriver) driver).context("FLUTTER");
+            System.out.println("Switched to Flutter context successfully");
+        } catch (Exception e) {
+            System.err.println("Failed to switch to Flutter context: " + e.getMessage());
+        }
     }
 }
