@@ -29,129 +29,107 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                script {
-                    echo "=== Checking out source code ==="
-                    checkout scm
-                }
+                echo "=== Checking out source code ==="
+                checkout scm
             }
         }
         
         stage('Setup') {
             steps {
-                script {
-                    echo "=== Setting up environment ==="
-                    sh '''
-                        echo "Java Version:"
-                        java -version
-                        echo ""
-                        echo "Maven Version:"
-                        mvn -version
-                    '''
-                }
+                echo "=== Verifying Environment ==="
+                sh '''
+                    echo "Java Version:"
+                    java -version
+                    echo ""
+                    echo "Maven Version:"
+                    mvn -version
+                '''
             }
         }
         
         stage('Build') {
             steps {
-                script {
-                    echo "=== Building project ==="
-                    sh '''
-                        mvn clean compile -DskipTests
-                    '''
-                }
+                echo "=== Building project ==="
+                sh 'mvn clean compile -DskipTests'
             }
         }
         
-        stage('Start Appium') {
+        stage('Verify Services') {
             steps {
-                script {
-                    echo "=== Starting Appium Server ==="
-                    sh '''
-                        # Kill any existing appium processes
-                        pkill -f "appium" || true
-                        sleep 2
-                        
-                        # Start Appium in background
-                        appium > "${WORKSPACE}/appium.log" 2>&1 &
-                        APPIUM_PID=$!
-                        
-                        # Wait for Appium to start
-                        sleep 5
-                        
-                        # Verify Appium is running
-                        if ! kill -0 $APPIUM_PID 2>/dev/null; then
-                            echo "Failed to start Appium"
-                            cat "${WORKSPACE}/appium.log"
-                            exit 1
-                        fi
-                        
-                        echo "Appium started successfully with PID: $APPIUM_PID"
-                    '''
-                }
+                echo "=== Checking Appium and Emulator ==="
+                sh '''
+                    echo "Checking if Appium is running..."
+                    if curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null; then
+                        echo "✓ Appium is running"
+                    else
+                        echo "✗ Appium is NOT running!"
+                        echo "Start Appium with: appium"
+                        exit 1
+                    fi
+                    
+                    echo ""
+                    echo "Checking emulator/device..."
+                    adb devices
+                    
+                    if adb devices | grep -q "device$"; then
+                        echo "✓ Emulator/Device is connected"
+                    else
+                        echo "✗ No emulator/device found!"
+                        echo "Start emulator: emulator -avd Medium_Phone_API_36.1 &"
+                        exit 1
+                    fi
+                '''
             }
         }
         
         stage('Run Tests') {
             steps {
-                script {
-                    echo "=== Running tests ==="
-                    sh '''
-                        # Give Appium more time to initialize
-                        sleep 3
-                        
-                        # Run Maven tests
-                        mvn test -X 2>&1 | tee "${WORKSPACE}/test-execution.log"
-                    '''
-                }
+                echo "=== Running Flutter Tests ==="
+                sh '''
+                    mvn clean test
+                '''
             }
         }
         
         stage('Generate Reports') {
             steps {
-                script {
-                    echo "=== Generating test reports ==="
-                    sh '''
-                        # Create report directory if it doesn't exist
-                        mkdir -p "${WORKSPACE}/test-output"
-                        
-                        # Copy Extent reports
-                        if [ -d "target/test-output" ]; then
-                            cp -r target/test-output/* "${WORKSPACE}/test-output/" 2>/dev/null || true
-                        fi
-                        
-                        # List generated reports
-                        echo "Generated reports:"
-                        ls -la "${WORKSPACE}/test-output/" 2>/dev/null || echo "No reports found"
-                    '''
-                }
+                echo "=== Test Reports Ready ==="
+                sh '''
+                    if [ -d "target/test-output" ]; then
+                        echo "✓ Test reports generated in target/test-output/"
+                    else
+                        echo "Note: No test-output directory found"
+                    fi
+                    
+                    if [ -d "target/surefire-reports" ]; then
+                        echo "✓ Surefire reports available in target/surefire-reports/"
+                    fi
+                '''
             }
         }
     }
     
     post {
         always {
-            // Kill Appium process
-            sh 'pkill -f "appium" || true'
-            
-            // Archive test reports
-            archiveArtifacts artifacts: 'test-output/**,logs/**,target/surefire-reports/**', 
+            // Archive test reports and artifacts
+            archiveArtifacts artifacts: 'target/surefire-reports/**,target/test-output/**,test-output/**', 
                              allowEmptyArchive: true
             
-            // Publish TestNG results if they exist
+            // Publish test results if available
             junit testResults: 'target/surefire-reports/**/*.xml', 
                   allowEmptyResults: true
         }
         
         success {
-            echo "✅ Tests completed successfully!"
+            echo "✅ BUILD SUCCESS - Tests passed!"
         }
         
         failure {
-            echo "❌ Tests failed - Check Appium and emulator status"
-        }
-        
-        unstable {
-            echo "⚠️ Build is unstable - Some tests may have failed"
+            echo "❌ BUILD FAILED - Verify Appium and emulator are running"
+            echo "Start services with:"
+            echo "  1. emulator -avd Medium_Phone_API_36.1 &"
+            echo "  2. appium"
+            echo "Then rebuild"
         }
     }
 }
