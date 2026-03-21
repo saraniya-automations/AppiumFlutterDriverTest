@@ -11,10 +11,6 @@ pipeline {
     }
     
     environment {
-        // Java configuration
-        JAVA_HOME = '/usr/local/opt/openjdk@17'
-        PATH = "${JAVA_HOME}/bin:/usr/local/bin:/opt/homebrew/bin:${PATH}"
-        
         // Appium configuration
         APPIUM_URL = 'http://127.0.0.1:4723/wd/hub'
         PLATFORM_NAME = 'Android'
@@ -38,11 +34,20 @@ pipeline {
             steps {
                 echo "=== Verifying Environment ==="
                 sh '''
+                    # Find Java using macOS standard method
+                    export JAVA_HOME=$(/usr/libexec/java_home)
+                    echo "JAVA_HOME: $JAVA_HOME"
                     echo "Java Version:"
                     java -version
                     echo ""
                     echo "Maven Version:"
                     mvn -version
+                    echo ""
+                    echo "Appium availability:"
+                    which appium || echo "⚠ Appium not in PATH"
+                    echo ""
+                    echo "ADB Version:"
+                    adb version | head -1
                 '''
             }
         }
@@ -50,7 +55,11 @@ pipeline {
         stage('Build') {
             steps {
                 echo "=== Building project ==="
-                sh 'mvn clean compile -DskipTests'
+                sh '''
+                    export JAVA_HOME=$(/usr/libexec/java_home)
+                    export PATH="$JAVA_HOME/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
+                    mvn clean compile -DskipTests
+                '''
             }
         }
         
@@ -111,6 +120,8 @@ pipeline {
             steps {
                 echo "=== Running Flutter Tests ==="
                 sh '''
+                    export JAVA_HOME=$(/usr/libexec/java_home)
+                    export PATH="$JAVA_HOME/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
                     mvn clean test
                 '''
             }
