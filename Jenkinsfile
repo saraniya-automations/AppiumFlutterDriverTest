@@ -73,16 +73,17 @@ pipeline {
             steps {
                 echo "=== Starting Services ==="
                 sh '''
+                    export JAVA_HOME=/opt/homebrew/opt/openjdk@17
                     export ANDROID_SDK_ROOT=/Users/ajaysara/Library/Android/sdk
-                    export PATH="${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:/opt/homebrew/bin:/usr/local/bin:${PATH}"
+                    export PATH="${JAVA_HOME}/bin:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/emulator:/opt/homebrew/bin:/usr/local/bin:${PATH}"
                     
                     # Kill any existing Appium
                     pkill -f "appium" 2>/dev/null || true
                     sleep 2
                     
-                    # Start Appium in background
-                    echo "Starting Appium server..."
-                    appium > /tmp/appium.log 2>&1 &
+                    # Start Appium in background with Java environment
+                    echo "Starting Appium server with Java environment..."
+                    JAVA_HOME=${JAVA_HOME} ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT} appium > /tmp/appium.log 2>&1 &
                     APPIUM_PID=$!
                     echo "Appium PID: $APPIUM_PID"
                     
