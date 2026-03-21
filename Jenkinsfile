@@ -12,13 +12,13 @@ pipeline {
     
     environment {
         // Java configuration
-        JAVA_HOME = '/usr/local/opt/openjdk@11'
+        JAVA_HOME = '/usr/local/opt/openjdk@17'
         PATH = "${JAVA_HOME}/bin:${PATH}"
         
         // Appium configuration
         APPIUM_URL = 'http://127.0.0.1:4723/wd/hub'
         PLATFORM_NAME = 'Android'
-        DEVICE_NAME = credentials('device-name') // Configure this in Jenkins
+        DEVICE_NAME = 'Medium_Phone_API_36.1'
         AUTOMATION_NAME = 'Flutter'
         
         // Project configuration
@@ -130,67 +130,28 @@ pipeline {
     
     post {
         always {
-            script {
-                echo "=== Cleanup ==="
-                sh '''
-                    # Kill Appium process
-                    pkill -f "appium" || true
-                    
-                    # Archive Appium logs
-                    if [ -f "${WORKSPACE}/appium.log" ]; then
-                        mkdir -p "${WORKSPACE}/logs"
-                        cp "${WORKSPACE}/appium.log" "${WORKSPACE}/logs/"
-                    fi
-                    
-                    # Archive test execution logs
-                    if [ -f "${WORKSPACE}/test-execution.log" ]; then
-                        mkdir -p "${WORKSPACE}/logs"
-                        cp "${WORKSPACE}/test-execution.log" "${WORKSPACE}/logs/"
-                    fi
-                '''
-                
-                // Archive test reports
-                archiveArtifacts artifacts: 'test-output/**,logs/**,target/surefire-reports/**', 
-                                 allowEmptyArchive: true
-                
-                // Publish TestNG results
-                publishHTML target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: 'test-output/html',
-                    reportFiles: 'extentReport.html',
-                    reportName: 'Extent Report'
-                ]
-            }
+            // Kill Appium process
+            sh 'pkill -f "appium" || true'
+            
+            // Archive test reports
+            archiveArtifacts artifacts: 'test-output/**,logs/**,target/surefire-reports/**', 
+                             allowEmptyArchive: true
+            
+            // Publish TestNG results if they exist
+            junit testResults: 'target/surefire-reports/**/*.xml', 
+                  allowEmptyResults: true
         }
         
         success {
-            script {
-                echo "✅ Tests completed successfully!"
-                // Send success email/notification here
-            }
+            echo "✅ Tests completed successfully!"
         }
         
         failure {
-            script {
-                echo "❌ Tests failed!"
-                // Send failure email/notification here
-                sh '''
-                    echo "=== Test Failure Summary ==="
-                    echo "Appium Log:"
-                    tail -50 "${WORKSPACE}/appium.log" 2>/dev/null || echo "No Appium logs"
-                    echo ""
-                    echo "Test Execution Log:"
-                    tail -100 "${WORKSPACE}/test-execution.log" 2>/dev/null || echo "No test logs"
-                '''
-            }
+            echo "❌ Tests failed - Check Appium and emulator status"
         }
         
         unstable {
-            script {
-                echo "⚠️ Build is unstable"
-            }
+            echo "⚠️ Build is unstable - Some tests may have failed"
         }
     }
 }
