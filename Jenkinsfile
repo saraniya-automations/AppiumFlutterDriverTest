@@ -11,8 +11,8 @@ pipeline {
     }
     
     environment {
-        // Java configuration - set explicit path
-        JAVA_HOME = '/usr/local/opt/openjdk@17'
+        // Java configuration - Apple Silicon (arm64) homebrew path
+        JAVA_HOME = '/opt/homebrew/opt/openjdk@17'
         PATH = "${JAVA_HOME}/bin:/usr/local/bin:/opt/homebrew/bin:${PATH}"
         
         // Appium configuration
