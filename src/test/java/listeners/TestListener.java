@@ -1,7 +1,5 @@
 package listeners;
 
-import com.aventstack.extentreports.Status;
-import driver.DriverManager;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -33,8 +31,8 @@ public class TestListener implements ITestListener {
         String screenshotPath = ScreenshotUtil.takeScreenshot(TestBase.driver, result.getMethod().getMethodName());
         try {
             TestBase.logger.pass("Test Passed",
-                com.aventstack.extentreports.MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build()
-            );
+                    com.aventstack.extentreports.MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath)
+                            .build());
         } catch (Exception e) {
             TestBase.logger.pass("Test Passed, screenshot not available");
         }
@@ -47,8 +45,8 @@ public class TestListener implements ITestListener {
         String screenshotPath = ScreenshotUtil.takeScreenshot(TestBase.driver, result.getMethod().getMethodName());
         try {
             TestBase.logger.fail("Test Failed",
-                com.aventstack.extentreports.MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath).build()
-            );
+                    com.aventstack.extentreports.MediaEntityBuilder.createScreenCaptureFromPath(screenshotPath)
+                            .build());
             TestBase.logger.fail(result.getThrowable());
         } catch (Exception e) {
             TestBase.logger.fail("Test Failed, screenshot not available");

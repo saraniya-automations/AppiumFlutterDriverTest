@@ -1,10 +1,7 @@
 package pages;
 
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.AppiumBy;
 import appium_flutter_driver.finder.FlutterElement;
-import org.openqa.selenium.WebElement;
-import java.util.HashMap;
 import java.util.Map;
 
 public class CatalogPage extends BasePage {
@@ -23,24 +20,24 @@ public class CatalogPage extends BasePage {
     }
 
     public CatalogPage scrollDown() {
-    FlutterElement listView = finder.byType("ListView");
-    driver.executeScript("flutter:scroll", listView,
-        Map.of("dx", 0, "dy", -300, "durationMilliseconds", 500));
-    return this;
+        FlutterElement listView = finder.byType("ListView");
+        driver.executeScript("flutter:scroll", listView,
+                Map.of("dx", 0, "dy", -300, "durationMilliseconds", 500));
+        return this;
+    }
+
+    public CatalogPage clickAddButton(String itemName) {
+        // Find the ADD button that is inside the row containing itemName
+        FlutterElement itemText = finder.byText(itemName);
+        FlutterElement addButton = finder.byText("ADD");
+        FlutterElement specificAddButton = finder.byAncestor(addButton, itemText);
+        click(specificAddButton);
+        return this;
+    }
+
+    public void clickCart() {
+        FlutterElement cartButton = finder.byTooltip("Cart");
+        click(cartButton);
+    }
+
 }
-
-public CatalogPage clickAddButton(String itemName) {
-    // Find the ADD button that is inside the row containing itemName
-    FlutterElement itemText = finder.byText(itemName);
-    FlutterElement addButton = finder.byText("ADD");
-    FlutterElement specificAddButton = finder.byAncestor(addButton, itemText);
-    click(specificAddButton);
-    return this;
-}
-
-    
-
-
- 
-}
-
