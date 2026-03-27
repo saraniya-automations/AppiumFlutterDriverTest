@@ -8,7 +8,12 @@
     </listeners>
     <test name = "BAAndroid tests.AppiumTestDemo" >
         <classes>
-            <class name="tests.LoginTest"> </class>
+            <!-- <class name="tests.LoginTest"> </class> -->
+            <class name="tests.LoginWithValidCredentialsTest"> </class>
+            <class name="tests.LoginWithInvalidCredentialsTest"> </class>
+            <class name="tests.NavigationFlowTest"> </class>
+            <class name="tests.LoginButtonInteractionTest"/>
+            <class name="tests.LoginWithEmptyFieldsTest"/>
         </classes>
     </test>
     

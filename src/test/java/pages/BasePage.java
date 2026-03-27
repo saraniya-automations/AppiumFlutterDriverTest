@@ -21,7 +21,7 @@ public class BasePage {
     }
 
     protected void waitForElement(FlutterElement element) {
-    driver.executeScript("flutter:waitFor", element, 30000L);
+        driver.executeScript("flutter:waitFor", element, 30000L);
     }
 
     protected void click(FlutterElement element) {
@@ -31,13 +31,22 @@ public class BasePage {
 
     protected void type(FlutterElement element, String text) {
         // waitForElement(element);
-        element.click();       // focus the field first
+        element.click(); // focus the field first
         element.sendKeys(text);
     }
 
     protected String getText(FlutterElement element) {
         waitForElement(element);
         return element.getText();
+    }
+
+    protected boolean isElementPresent(FlutterElement element) {
+        try {
+            waitForElement(element);
+            return element.isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

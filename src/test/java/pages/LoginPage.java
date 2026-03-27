@@ -38,4 +38,8 @@ public class LoginPage extends BasePage {
                 .enterPassword(password);
         return clickLogin();
     }
+
+    public boolean isLoginButtonPresent() {
+        return isElementPresent(loginButton);
+    }
 }

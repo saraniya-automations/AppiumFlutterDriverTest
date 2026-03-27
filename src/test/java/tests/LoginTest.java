@@ -61,8 +61,6 @@ public class LoginTest extends TestBase {
             logger.info("✓ Login successful with email: " + email);
             logger.info("✓ Catalog page verified");
             System.out.println("✓ Login successful and all screenshots captured");
-            // catalogPage.clickCart();
-            // catalogPage.clickAddButton("Code Smell");
 
         } catch (Exception e) {
             String errorScreenshot = ScreenshotUtil.takeScreenshot(driver, "error_screenshot");
@@ -73,29 +71,6 @@ public class LoginTest extends TestBase {
             throw new RuntimeException("Login test failed", e);
         }
     }
-
-    // @AfterMethod
-    // public void tearDown() {
-    // try {
-    // // Take final screenshot
-    // String finalScreenshot = ScreenshotUtil.takeScreenshot(driver,
-    // "final_state");
-    // if (finalScreenshot != null && logger != null) {
-    // logger.addScreenCaptureFromPath(finalScreenshot);
-    // logger.info("✓ Final screenshot captured");
-    // }
-
-    // if (driver != null) {
-    // // Terminate the app using mobile command
-    // java.util.HashMap<String, Object> params = new java.util.HashMap<>();
-    // params.put("bundleId", "com.example.provider_shopper");
-    // driver.executeScript("mobile: terminateApp", params);
-    // System.out.println("✓ App terminated after test");
-    // }
-    // } catch (Exception e) {
-    // System.out.println("⚠ Note: App termination note: " + e.getMessage());
-    // }
-    // }
 
     @AfterMethod
     public void tearDown() {
